@@ -9,22 +9,26 @@ http://localhost:3000
 ## REQUEST BODY
 ```json
 {
-"userID": "string",
+"userid": "string",
 "password": "string"
 }
 ```
 ## RESPONSE(임시LOGIN)
-- 서버 고유 ID: 1,2,3
-- 멘토(1명) 1 / 멘티(2명) 2,3
+- 서버 고유 id: 1,2,3
+- 멘토(1명)id: 1 / 멘티(2명)id: 2,3
+### 멘토 로그인
 ```json  
 {
   "succcess": true,
-  "userID": 1,
+  "userid": 1,
   "role": "mentor"
 }
+```
+### 멘티(학생) 로그인
+```json
 {
   "succcess": true,
-  "userID": 2,
+  "userid": 2,
   "role": "student"
 }
 ```
