@@ -4,8 +4,8 @@ Node.js + Express backend for 설스터디
 # BASE URL
 http://localhost:3000
 ## LOGIN
--Method: POST
--URL: /login
+- Method: POST
+- URL: /login
 ## REQUEST BODY
 json
 {
