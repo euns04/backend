@@ -12,6 +12,7 @@ http://localhost:3000
 "userID": "string",
 "password": "string"
 }
+```
 ## RESPONSE(임시LOGIN)
 - 서버 고유 ID
 - 멘토(1명) 1 / 멘티(2명) 2,3
