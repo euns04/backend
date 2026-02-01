@@ -16,7 +16,7 @@ http://localhost:3000
 ## RESPONSE(임시LOGIN)
 - 서버 고유 ID
 - 멘토(1명) 1 / 멘티(2명) 2,3
-- 
+```json  
 { "succcess": true,
   "userID": 1,
   "role": "mentor"
@@ -24,4 +24,4 @@ http://localhost:3000
 { "succcess": true,
   "userID": 2,
   "role": "student"
-}
+}```
