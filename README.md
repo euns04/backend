@@ -14,7 +14,7 @@ http://localhost:3000
 }
 ```
 ## RESPONSE(임시LOGIN)
-- 서버 고유 ID
+- 서버 고유 ID: 1,2,3
 - 멘토(1명) 1 / 멘티(2명) 2,3
 ```json  
 { "succcess": true,
