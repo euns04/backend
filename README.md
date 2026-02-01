@@ -7,7 +7,7 @@ http://localhost:3000
 - Method: POST
 - URL: /login
 ## REQUEST BODY
-json
+```json
 {
 "userID": "string",
 "password": "string"
