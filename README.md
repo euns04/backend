@@ -2,7 +2,13 @@ Node.js + Express backend for study planner project.
 
 # Backend API
 ## BASE URL
-Local: http://localhost:3000
+http://localhost:3000
 ## LOGIN
 Method: POST
 URL: /login
+### REQUEST BODY
+json
+{
+"userID": "string",
+"password": "string"
+}
