@@ -1,4 +1,4 @@
-Node.js + Express backend for study planner project.
+Node.js + Express backend for 설스터디
 
 # Backend API
 # BASE URL
