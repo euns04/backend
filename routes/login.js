@@ -1,21 +1,22 @@
 const express = require("express");
 const router = express.Router();
-const bcrypt = require("bcrypt");
-const User = require("../models/user");
+//DB아직 안쓰므로 주석
+// const User = require("../models/user");
 
-// (선택) 연결 테스트용
-router.get("/", (req, res) => {
-  return res.json({ ok: true, message: "login route alive" });
+// 서버연결확인용
+router.get("/ping", (req, res) => {
+  return res.json({ ok: true, message: "auth route alive" });
 });
 
-router.post("/", async (req, res) => {
+// POST /api/auth/login
+router.post("/login", async (req, res) => {
   const { loginId, password } = req.body;
 
-  // 입력값 검증
   if (!loginId || !password) {
     return res.status(400).json({ ok: false, error: "loginId와 password가 필요합니다." });
   }
 
+  /*
   try {
     const user = await User.findOne({ loginId });
 
@@ -24,20 +25,17 @@ router.post("/", async (req, res) => {
       return res.status(401).json({ ok: false, error: "해당하는 ID가 없습니다." });
     }
 
-    // 비밀번호 확인 (DB에 해시가 저장되어 있다는 전제)
-    // user.password 또는 user.passwordHash 등 필드명은 네 모델에 맞춰야 함
-    const hashed = user.password; // <-- 모델 필드명이 다르면 여기만 바꿔
-    const isValid = await bcrypt.compare(password, hashed);
-
-    if (!isValid) {
+    // 비밀번호 확인 (일단은 '평문' 비교로 빠르게 완성)
+    // 네 DB가 해시를 쓰고 있으면 여기 bcrypt.compare로 바꿔야 함
+    if (user.password !== password) {
       return res.status(401).json({ ok: false, error: "비밀번호가 올바르지 않습니다." });
     }
 
-    // 성공 응답: role 기반 라우팅을 위해 role 내려주기
+    // 성공 응답: role 내려주기 (프론트가 role 보고 라우팅)
     return res.json({
       ok: true,
       data: {
-        role: user.role,       // user.role이 없다면 임시로 "mentor"로
+        role: user.role || "mentor",
         username: user.username || user.loginId
       }
     });
@@ -45,6 +43,9 @@ router.post("/", async (req, res) => {
     console.log(e);
     return res.status(500).json({ ok: false, error: "서버 오류가 발생했습니다." });
   }
+}); */
+
+  return res.status(501).json({ok:false, error: "DB가 아직 준비되지 않음(서버연결OK)"});
 });
 
 module.exports = router;
