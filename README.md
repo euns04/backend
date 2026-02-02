@@ -9,7 +9,7 @@ http://localhost:5000
 ## REQUEST BODY
 ```json
 {
-"userid": "string",
+"loginId": "string",
 "password": "string"
 }
 ```
@@ -20,7 +20,7 @@ http://localhost:5000
 ```json  
 {
   "succcess": true,
-  "userid": 1,
+  "loginId": 1,
   "role": "mentor"
 }
 ```
@@ -28,7 +28,7 @@ http://localhost:5000
 ```json
 {
   "succcess": true,
-  "userid": 2,
+  "loginId": 2,
   "role": "student"
 }
 ```
