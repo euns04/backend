@@ -1,15 +1,15 @@
 const mongoose = require('mongoose');
-const User = require('./models.user');
+const User = require('../models/user');
 const bcrypt = require('bcrypt');
 
 async function main(){
     const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/compiling-project';
-    mongoose.connect(mongoUri).catch(() => {
+    await mongoose.connect(mongoUri).catch(() => {
     console.warn('user db 조회 실패');
     });
 
-    const password1 = process.env.SEED_PASSWORD || 'mentee1234';
-    const password2 = process.env.SEED_PASSWORD || 'mentor1234';
+    const password1 = process.env.SEED_PASSWORD_MENTEE || 'mentee1234';
+    const password2 = process.env.SEED_PASSWORD_MENTOR || 'mentor1234';
     const passwordHash1 = await bcrypt.hash(password1, 10);
     const passwordHash2 = await bcrypt.hash(password2, 10);
 

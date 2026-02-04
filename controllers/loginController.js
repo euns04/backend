@@ -3,6 +3,7 @@ const loginControl = (req, res, user) => {
         return res.status(404).json({ ok: false, error: 'user 불러오기 실패' });
     }
     req.session.user = {
+        userId: user._id,
         loginId: user.loginId,
         username: user.username,
         role: user.role
@@ -15,8 +16,10 @@ const loginControl = (req, res, user) => {
         return res.json({
             ok: true,
             data: {
+                userId: String(user._id),
                 role: user.role,
-                username: user.username
+                username: user.username,
+                mentoId: user.mentorId
             }
         });
     });

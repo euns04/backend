@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
     loginId: {
         type: String,
-        required: [true, 'error']
+        required: [true, 'error'],
+        unique: WebTransportDatagramDuplexStream
     },
     username: {
         type: String,
@@ -17,7 +18,13 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ['mentor', 'mentee'],
         required: true
+    },
+    // user가 멘티일 때 mentor의 id
+    mentorId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null
     }
-})
+}, {timestamps: true})
 
 module.exports = mongoose.model('User', userSchema);
