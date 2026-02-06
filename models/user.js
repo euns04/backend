@@ -4,7 +4,7 @@ const userSchema = new mongoose.Schema({
     loginId: {
         type: String,
         required: [true, 'error'],
-        unique: WebTransportDatagramDuplexStream
+        unique: true
     },
     username: {
         type: String,

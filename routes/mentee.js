@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const menteeController = require('../controllers/menteeController');
+const menteeController = require('../controllers/menteeController.js');
 const {requireLogin, requireMentee} = require('../middlewares/auth');
 
 router.get(

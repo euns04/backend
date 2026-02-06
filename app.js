@@ -42,7 +42,7 @@ app.use('/api/auth', require('./routes/login'));
 
 // 예: 로그인한 사람만 접근 가능한 라우트 (미들웨어 사용)
 const { requireLogin, requireRole } = require('./middlewares/loginMiddleware');
-app.get('/api/me', requireLogin, (req, res) => {
+app.get('/api/mentomentee', requireLogin, (req, res) => {
   res.json({ ok: true, data: req.session.user });
 });
 // app.get('/api/mentor-only', requireLogin, requireRole('mentor'), (req, res) => { ... });
