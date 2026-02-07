@@ -1,19 +1,19 @@
 const express = require('express');
 const router = express.Router();
-const menteeController = require('../controllers/menteeController.js');
-const {requireLogin, requireMentee} = require('../middlewares/auth');
+const menteeController = require('../controllers/menteeController');
+const {requireLogin, requireRole} = require('../middlewares/loginMiddleware');
 
 router.get(
     '/dashboard',
     requireLogin,
-    requireMentee,
+    requireRole,
     menteeController.getDashboard
 )
 
 router.post(
     '/todos',
     requireLogin,
-    requireMentee,
+    requireRole,
     menteeController.addTodo
 )
 

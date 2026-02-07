@@ -1,6 +1,6 @@
-const User = require('../models.user');
-const Todo = require('../models.todo');
-const Reminder = require('../models.reminder');
+const User = require('../models/user');
+const Todo = require('../models/todo');
+const Reminder = require('../models/reminder');
 
 exports.getDashboard = async(req, res) => {
     const userId = req.session.userId;
