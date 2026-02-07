@@ -2,6 +2,13 @@ const loginControl = (req, res, user) => {
     if (!user) {
         return res.status(404).json({ ok: false, error: 'user 불러오기 실패' });
     }
+    // 세션 필드 통일: 앞으로는 req.session.userId / req.session.role를 1차 소스로 사용
+    // (하위호환을 위해 req.session.user도 같이 유지)
+    req.session.userId = user._id;
+    req.session.role = user.role;
+    req.session.username = user.username;
+    req.session.loginId = user.loginId;
+
     req.session.user = {
         userId: user._id,
         loginId: user.loginId,

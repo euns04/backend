@@ -10,8 +10,12 @@ const todoSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
+    category: {
+        type: String,
+        default: 'uncategorized'
+    },
     deletable: { type: Boolean, default: true },
     isDone: { type: Boolean, default: false }
-})
+}, {timestamps: true})
 
 module.exports = mongoose.model('Todo', todoSchema);

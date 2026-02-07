@@ -8,9 +8,15 @@ const menteeRoutes = require('./routes/mentee');
 const app = express();
 
 const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/compiling-project';
-mongoose.connect(mongoUri).catch(() => {
-  console.warn('MongoDB 연결 실패 - 로그인 DB 조회는 동작하지 않습니다.');
-});
+mongoose
+  .connect(mongoUri)
+  .then(() => {
+    console.log('MongoDB 연결 성공');
+  })
+  .catch((err) => {
+    console.warn('MongoDB 연결 실패 - DB 조회/저장이 동작하지 않습니다.');
+    console.warn(err?.message || err);
+  });
 
 const secret = process.env.COOKIE_SECRET || 'dev-secret-change-in-production';
 

@@ -6,8 +6,17 @@ const { loginControl } = require('../controllers/loginController');
 const user = require('../models/user');
 
 router.get('/login', (req, res) => {
-    if (req.session && req.session.user) {
-        return res.json({ ok: true, data: req.session.user });
+    if (req.session && (req.session.userId || req.session.user)) {
+        const data = req.session.userId
+            ? {
+                userId: String(req.session.userId),
+                loginId: req.session.loginId,
+                username: req.session.username,
+                role: req.session.role,
+            }
+            : req.session.user;
+
+        return res.json({ ok: true, data });
     }
     return res.json({ ok: false, error: '로그인되지 않음' });
 });
