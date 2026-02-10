@@ -10,21 +10,29 @@ async function main(){
 
     const password1 = process.env.SEED_PASSWORD_MENTEE || 'mentee1234';
     const password2 = process.env.SEED_PASSWORD_MENTOR || 'mentor1234';
+    const password3 = process.env.SEED_PASSWORD_MENTEE2 || 'mentee2345';
     const passwordHash1 = await bcrypt.hash(password1, 10);
     const passwordHash2 = await bcrypt.hash(password2, 10);
+    const passwordHash3 = await bcrypt.hash(password3, 10);
 
     const users = [
         {
             loginId: 'mentee1',
-            username: '멘티1',
+            username: '민지',
             role: 'mentee',
             password: passwordHash1
         },
         {
             loginId: 'mentor1',
-            username: '멘토1',
+            username: '박설아',
             role: 'mentor',
             password: passwordHash2
+        },
+        {
+            loginId: 'mentee2',
+            username: '민수',
+            role: 'mentee',
+            password: passwordHash3
         }
     ];
 
@@ -34,6 +42,19 @@ async function main(){
             {$set: user},
             {upsert: true}
         )
+    }
+
+    // ✅ 관계 설정: mentee1/mentee2의 mentorId -> mentor1
+    const mentor = await User.findOne({ loginId: 'mentor1' }).select('_id').lean();
+    if (mentor?._id) {
+        await User.updateOne(
+            { loginId: 'mentee1' },
+            { $set: { mentorId: mentor._id } }
+        );
+        await User.updateOne(
+            { loginId: 'mentee2' },
+            { $set: { mentorId: mentor._id } }
+        );
     }
 }
 

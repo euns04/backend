@@ -24,6 +24,13 @@ router.post(
     menteeController.addTodo
 )
 
+router.patch(
+    '/todos/:id',
+    requireLogin,
+    requireRole('mentee'),
+    menteeController.updateTodo
+)
+
 router.post(
     '/studytime',
     requireLogin,

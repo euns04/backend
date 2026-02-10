@@ -8,12 +8,14 @@ const loginControl = (req, res, user) => {
     req.session.role = user.role;
     req.session.username = user.username;
     req.session.loginId = user.loginId;
+    req.session.themeId = user.themeId || 'white';
 
     req.session.user = {
         userId: user._id,
         loginId: user.loginId,
         username: user.username,
-        role: user.role
+        role: user.role,
+        themeId: user.themeId || 'white',
     };
     req.session.save((err) => {
         if (err) {
@@ -26,7 +28,8 @@ const loginControl = (req, res, user) => {
                 userId: String(user._id),
                 role: user.role,
                 username: user.username,
-                mentoId: user.mentorId
+                mentoId: user.mentorId,
+                themeId: user.themeId || 'white',
             }
         });
     });

@@ -3,6 +3,8 @@ const Todo = require('../models/todo');
 const Reminder = require('../models/reminder');
 const DailyComment = require('../models/dailyComment');
 const StudyTime = require('../models/studyTime');
+const TodoDetail = require('../models/todoDetail');
+const Feedback = require('../models/feedback');
 const mongoose = require('mongoose');
 
 exports.getDashboard = async(req, res) => {
@@ -84,6 +86,60 @@ exports.getDashboard = async(req, res) => {
             }
         }
 
+        // ✅ todo 상세(오답노트) 기반 "멘토 피드백" 목록 (최근 N개)
+        const todoById = new Map((todos || []).map((t) => [String(t._id), t]));
+        const todoIds = (todos || []).map((t) => t._id);
+
+        let mentorTodoFeedback = [];
+        if (todoIds.length > 0) {
+            const details = await TodoDetail.find({
+                todoId: { $in: todoIds },
+                mentorFeedback: { $exists: true, $ne: '' },
+            })
+                .select('todoId mentorFeedback updatedAt')
+                .sort({ updatedAt: -1, _id: -1 })
+                .limit(50)
+                .lean();
+
+            mentorTodoFeedback = (details || []).map((d) => {
+                const todo = todoById.get(String(d.todoId));
+                const dateKey = todo?.date ? new Date(todo.date).toISOString().slice(0, 10) : null;
+                return {
+                    id: String(d._id),
+                    todoId: String(d.todoId),
+                    title: todo?.title ?? '(제목 없음)',
+                    dateKey,
+                    category: todo?.category ?? '기타',
+                    deletable: todo?.deletable,
+                    isDone: !!todo?.isDone,
+                    mentorFeedback: d.mentorFeedback ?? '',
+                    updatedAt: d.updatedAt,
+                };
+            }).filter((x) => x.todoId && x.mentorFeedback);
+        }
+
+        // ✅ 멘토 화면 '피드백 작성'에서 저장한 일반 피드백(Feedback 모델)
+        let mentorGeneralFeedback = [];
+        const mentorId = me?.mentorId?._id || me?.mentorId;
+        if (mentorId && mongoose.isValidObjectId(mentorId)) {
+            const list = await Feedback.find({
+                menteeId: userId,
+                mentorId,
+            })
+                .select('date title body createdAt')
+                .sort({ createdAt: -1, _id: -1 })
+                .limit(50)
+                .lean();
+
+            mentorGeneralFeedback = (list || []).map((f) => ({
+                id: String(f._id),
+                date: f.date,
+                title: f.title,
+                body: f.body,
+                createdAt: f.createdAt,
+            }));
+        }
+
         return res.json({
             ok: true,
             data: {
@@ -105,6 +161,8 @@ exports.getDashboard = async(req, res) => {
                     deletable: t.deletable,
                     isDone: t.isDone
                 })),
+                mentorTodoFeedback,
+                mentorGeneralFeedback,
                 studyTime: studyByDate,
                 weekSummary: [],
                 dailyCommentsByDate
@@ -152,7 +210,8 @@ exports.saveDailyComment = async(req, res) => {
 
 exports.addTodo = async(req, res) => {
     const userId = req.session?.userId;
-    const { title, date, category } = req.body;
+    const { title, date, category, subject, isDone } = req.body;
+    const normalizedCategory = category ?? subject;
 
     console.log('[addtodo] body:', req.body);
 
@@ -173,13 +232,14 @@ exports.addTodo = async(req, res) => {
             userId,
             title,
             date,
-            category: category ?? 'uncategorized'
+            category: normalizedCategory ?? 'uncategorized',
+            isDone: isDone ?? false
         })
 
         return res.json({
             ok: true,
             data: {
-                id: todo._id,
+                id: String(todo._id),
                 title: todo.title,
                 date: todo.date,
                 category: todo.category,
@@ -191,6 +251,54 @@ exports.addTodo = async(req, res) => {
         return res.status(500).json({ok: false, error: '서버 오류'});
     }
 }
+
+exports.updateTodo = async (req, res) => {
+    const userId = req.session?.userId;
+    const { id } = req.params;
+    const { isDone } = req.body;
+
+    if (!userId) {
+        return res.status(401).json({ ok: false, error: '로그인이 필요합니다.' });
+    }
+
+    if (mongoose.connection.readyState !== 1) {
+        return res.status(503).json({ ok: false, error: 'DB 연결이 되어있지 않습니다.' });
+    }
+
+    if (!mongoose.isValidObjectId(id)) {
+        return res.status(400).json({ ok: false, error: 'todo id 에러' });
+    }
+
+    if (typeof isDone !== 'boolean') {
+        return res.status(400).json({ ok: false, error: 'isDone(boolean) 필수' });
+    }
+
+    try {
+        const updated = await Todo.findOneAndUpdate(
+            { _id: id, userId },
+            { $set: { isDone } },
+            { new: true }
+        ).select('title date category deletable isDone').lean();
+
+        if (!updated) {
+            return res.status(404).json({ ok: false, error: '존재하지 않는 todo' });
+        }
+
+        return res.json({
+            ok: true,
+            data: {
+                id: String(updated._id),
+                title: updated.title,
+                date: updated.date,
+                category: updated.category,
+                deletable: updated.deletable,
+                isDone: updated.isDone
+            }
+        });
+    } catch (err) {
+        return res.status(500).json({ ok: false, error: '서버 오류' });
+    }
+};
 
 exports.deleteTodo = async(req, res) => {
     const userId = req.session?.userId;
@@ -274,10 +382,10 @@ exports.saveStudyTime = async(req, res) => {
 
 exports.addReminder = async(req, res) => {
     const userId = req.session?.userId;
-    const { title, date, time } = req.body;
+    const { todoId, at } = req.body;
 
-    if (!title || !time){
-        return res.status(400).json({ok: false, error: 'title/time 필수'});
+    if (!todoId || !at){
+        return res.status(400).json({ok: false, error: 'todoId/at 필수'});
     }
 
     if (!userId) {
@@ -291,18 +399,16 @@ exports.addReminder = async(req, res) => {
 
         const reminder = await Reminder.create({
             userId,
-            title,
-            date,
-            time
+            todoId,
+            at
         })
 
         return res.json({
             ok: true,
             data: {
                 id: reminder._id,
-                date: reminder.date,
-                title: reminder.title,
-                time: reminder.time
+                todoId: reminder.todoId,
+                at: reminder.at
             }
         })
     } catch (err){

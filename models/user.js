@@ -24,6 +24,11 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         default: null
+    },
+    // UI 테마(프론트 themeId)
+    themeId: {
+        type: String,
+        default: 'white'
     }
 }, {timestamps: true})
 

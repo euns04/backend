@@ -3,7 +3,7 @@ const router = express.Router();
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const { loginControl } = require('../controllers/loginController');
-const user = require('../models/user');
+const { requireLogin } = require('../middlewares/loginMiddleware');
 
 router.get('/login', (req, res) => {
     if (req.session && (req.session.userId || req.session.user)) {
@@ -13,6 +13,7 @@ router.get('/login', (req, res) => {
                 loginId: req.session.loginId,
                 username: req.session.username,
                 role: req.session.role,
+                themeId: req.session.themeId,
             }
             : req.session.user;
 
@@ -50,6 +51,33 @@ router.post('/logout', (req, res) => {
         res.clearCookie('connect.sid');
         return res.json({ ok: true });
     });
+});
+
+// ✅ 테마 저장 (DB + 세션)
+router.patch('/preferences/theme', requireLogin, async (req, res) => {
+    const userId = req.session?.userId;
+    const { themeId } = req.body || {};
+
+    if (!userId) {
+        return res.status(401).json({ ok: false, error: '로그인이 필요합니다.' });
+    }
+    if (typeof themeId !== 'string' || themeId.trim().length === 0) {
+        return res.status(400).json({ ok: false, error: 'themeId(string) 필수' });
+    }
+
+    const next = themeId.trim();
+
+    try {
+        await User.updateOne({ _id: userId }, { $set: { themeId: next } });
+        req.session.themeId = next;
+        if (req.session.user) req.session.user.themeId = next;
+        req.session.save(() => {});
+
+        return res.json({ ok: true, data: { themeId: next } });
+    } catch (e) {
+        console.error(e);
+        return res.status(500).json({ ok: false, error: '서버 오류' });
+    }
 });
 
 module.exports = router;

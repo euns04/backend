@@ -1,23 +1,31 @@
 const mongoose = require('mongoose');
 
 const reminderSchema = new mongoose.Schema({
-    userId: mongoose.Schema.Types.ObjectId,
-    title: {
-        type: String,
-        required: true
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+        index: true
     },
-    date: {
-        type: Date,
-        required: true
+    todoId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Todo',
+        required: true,
+        index: true
     },
-    time: {
+    at: {
         type: Date,
-        required: true
+        required: true,
+        index: true
     },
     isSent: {
         type:Boolean,
-        require: false
+        required: false,
+        default: false,
+        index: true
     }
-})
+}, {timestamps: true})
+
+reminderSchema.index({userId: 1, todoId: 1, at: 1}, {unique: true});
 
 module.exports = mongoose.model('Reminder', reminderSchema);

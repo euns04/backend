@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const menteeRoutes = require('./routes/mentee');
+const mentorRoutes = require('./routes/mentor');
+const todoDetailRoutes = require('./routes/todoDetail');
 
 const app = express();
 
@@ -54,6 +56,9 @@ app.get('/api/mentomentee', requireLogin, (req, res) => {
 
 app.use('/api/auth', require('./routes/login'));
 app.use('/api/mentormentee', menteeRoutes);
+app.use('/api/mentormentee/mentor', mentorRoutes);
+app.use('/api/todos', todoDetailRoutes);
+app.use('/sse', require('./routes/sse'));
 
 console.log('menteeRoutes loaded:', !!menteeRoutes);
 
