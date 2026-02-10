@@ -1,12 +1,24 @@
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+
+const { applyDnsServers } = require('../dnsConfig');
 const mongoose = require('mongoose');
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
+const { MONGODB_URI } = require('../env');
 
 async function main(){
-    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/compiling-project';
-    await mongoose.connect(mongoUri).catch(() => {
-    console.warn('user db 조회 실패');
-    });
+    const mongoUri = MONGODB_URI || 'mongodb://localhost:27017/compiling-project';
+    applyDnsServers();
+
+    try {
+        await mongoose.connect(mongoUri);
+    } catch (err) {
+        console.warn('user db 조회 실패');
+        console.warn(err?.message || err);
+        console.warn('MONGODB_URI를 확인하세요. 예) mongodb+srv://USER:PASSWORD@HOST/DB?retryWrites=true&w=majority');
+        throw err;
+    }
 
     const password1 = process.env.SEED_PASSWORD_MENTEE || 'mentee1234';
     const password2 = process.env.SEED_PASSWORD_MENTOR || 'mentor1234';

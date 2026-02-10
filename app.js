@@ -1,15 +1,25 @@
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
+
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const { applyDnsServers } = require('./dnsConfig');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const menteeRoutes = require('./routes/mentee');
 const mentorRoutes = require('./routes/mentor');
 const todoDetailRoutes = require('./routes/todoDetail');
+const { MONGODB_URI, COOKIE_SECRET, FRONTEND_ORIGIN } = require('./env');
 
 const app = express();
 
-const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/compiling-project';
+applyDnsServers();
+
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
+const mongoUri = MONGODB_URI;
 mongoose
   .connect(mongoUri)
   .then(() => {
@@ -20,10 +30,20 @@ mongoose
     console.warn(err?.message || err);
   });
 
-const secret = process.env.COOKIE_SECRET || 'dev-secret-change-in-production';
+const secret = COOKIE_SECRET;
+
+const allowedOrigins = (process.env.FRONTEND_ORIGINS || FRONTEND_ORIGIN || '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
 
 app.use(cors({
-  origin: process.env.FRONTEND_ORIGIN || 'http://localhost:5173',
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true);
+    if (allowedOrigins.length === 0) return cb(null, true);
+    if (allowedOrigins.includes(origin)) return cb(null, true);
+    return cb(new Error(`CORS 차단: ${origin}`));
+  },
   credentials: true
 }));
 app.use(express.json());
@@ -36,7 +56,7 @@ app.use(session({
   cookie: {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    sameSite: process.env.COOKIE_SAMESITE || (process.env.NODE_ENV === 'production' ? 'none' : 'lax'),
     maxAge: 24 * 60 * 60 * 1000
   }
 }));
@@ -52,7 +72,6 @@ const { requireLogin, requireRole } = require('./middlewares/loginMiddleware');
 app.get('/api/mentomentee', requireLogin, (req, res) => {
   res.json({ ok: true, data: req.session.user });
 });
-// app.get('/api/mentor-only', requireLogin, requireRole('mentor'), (req, res) => { ... });
 
 app.use('/api/auth', require('./routes/login'));
 app.use('/api/mentormentee', menteeRoutes);
